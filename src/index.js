@@ -12,6 +12,9 @@ const version = '1.0.0';
 let totalRequests = 0;
 let activeRequests = 0;
 
+// 在文件开头添加日志存储
+const requestLogs = [];
+
 // 中间件配置
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -171,15 +174,18 @@ app.get('/env-checksum', (req, res) => {
 });
 
 app.post('/v1/chat/completions', async (req, res) => {
-  // o1开头的模型，不支持流式输出
-  if (req.body.model.startsWith('o1-') && req.body.stream) {
-    return res.status(400).json({
-      error: 'Model not supported stream',
-    });
-  }
-
-  let currentKeyIndex = 0;
+  const requestTime = new Date();
+  let usedChecksum;
+  
   try {
+    // o1开头的模型，不支持流式输出
+    if (req.body.model.startsWith('o1-') && req.body.stream) {
+      return res.status(400).json({
+        error: 'Model not supported stream',
+      });
+    }
+
+    let currentKeyIndex = 0;
     const { model, messages, stream = false } = req.body;
     let authToken = req.headers.authorization?.replace('Bearer ', '');
     // 处理逗号分隔的密钥
@@ -203,10 +209,23 @@ app.post('/v1/chat/completions', async (req, res) => {
 
     const hexData = await stringToHex(messages, model);
 
-    // 生成checksum
-    const checksum = req.headers['x-cursor-checksum'] 
-                  ?? process.env['X_CURSOR_CHECKSUM'] // 环境变量使用大写
-                  ?? generateCursorChecksum(generateHashed64Hex(), generateHashed64Hex());
+    // 记录使用的 checksum
+    usedChecksum = req.headers['x-cursor-checksum'] 
+                ?? process.env['X_CURSOR_CHECKSUM'] // 环境变量使用大写
+                ?? generateCursorChecksum(generateHashed64Hex(), generateHashed64Hex());
+
+    // 添加日志记录
+    requestLogs.push({
+      timestamp: requestTime,
+      model: req.body.model,
+      checksum: usedChecksum,
+      stream: req.body.stream || false
+    });
+
+    // 只保留最近100条记录
+    if (requestLogs.length > 100) {
+      requestLogs.shift();
+    }
 
     const response = await fetch('https://api2.cursor.sh/aiserver.v1.AiService/StreamChat', {
       method: 'POST',
@@ -217,7 +236,7 @@ app.post('/v1/chat/completions', async (req, res) => {
         'connect-protocol-version': '1',
         'user-agent': 'connect-es/1.4.0',
         'x-amzn-trace-id': `Root=${uuidv4()}`,
-        'x-cursor-checksum': checksum,
+        'x-cursor-checksum': usedChecksum,
         'x-cursor-client-version': '0.42.3',
         'x-cursor-timezone': 'Asia/Shanghai',
         'x-ghost-mode': 'false',
@@ -304,6 +323,15 @@ app.post('/v1/chat/completions', async (req, res) => {
       }
     }
   }
+});
+
+// 添加日志获取接口
+app.get('/v1/logs', (req, res) => {
+  const limit = parseInt(req.query.limit) || 100;
+  res.json({
+    total: requestLogs.length,
+    logs: requestLogs.slice(-limit)
+  });
 });
 
 // 启动服务器

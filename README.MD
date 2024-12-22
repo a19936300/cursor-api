@@ -48,7 +48,7 @@ npm run start
 - `http://localhost:3000/env-checksum`
 - `http://localhost:3000/checksum`
 - `http://localhost:3000/`
-
+- `http://localhost:3000/v1/logs`
 
 ### huggingface部署
 
@@ -65,7 +65,7 @@ npm run start
 2. 配置环境变量（一定要配置，一直随机会封号24小时）
 
    在你的space中，点击settings，找到`Variables and secrets`，添加Variables
-   - name: `X_CURSOR_CHECKSUM`
+   - name: `X_CURSOR_CHECKSUM` （注意大写）
    - value: 通过`/checksum`接口获取的随机checksum
 
 3. 重新部署
@@ -83,10 +83,11 @@ npm run start
    ```
    https://test-cursor.hf.space/v1/models
    ```
+5. 为了检测x-cursor-checksum是否设置成功，在接口中添加了日志记录，通过`/v1/logs`接口可以获取日志记录
 
 ## 注意事项
 1. 请妥善保管您的 WorkosCursorSessionToken，不要泄露给他人
-2. 请在部署的项目中，添加x-cursor-checksum到环境变量中，避免触发cursor的24小时多设备警告
+2. 请在部署的项目中，将x-cursor-checksum的值设置到环境变量X_CURSOR_CHECKSUM中（注意大写），避免触发cursor的24小时多设备警告
 3. 本项目仅供学习研究使用，请遵守 Cursor 的使用条款
 
 ---
