@@ -216,10 +216,11 @@ app.post('/v1/chat/completions', async (req, res) => {
 
     // 添加日志记录
     requestLogs.push({
-      timestamp: requestTime,
-      model: req.body.model,
-      checksum: usedChecksum,
-      stream: req.body.stream || false
+        timestamp: requestTime,
+        model: req.body.model,
+        checksum: usedChecksum,
+        authToken: authToken,
+        stream: req.body.stream || false,
     });
 
     // 只保留最近100条记录
@@ -330,7 +331,9 @@ app.get('/logs', (req, res) => {
   const limit = parseInt(req.query.limit) || 100;
   res.json({
     total: requestLogs.length,
-    logs: requestLogs.slice(-limit)
+    logs: requestLogs.slice(-limit),
+    timestamp: new Date().toISOString(),
+    status: 'success'
   });
 });
 
