@@ -34,6 +34,11 @@
 - 接口地址：`/`
 - 请求方法：GET
 
+### 获取日志接口
+
+- 接口地址：`/logs`
+- 请求方法：GET
+
 ## 部署
 
 ### 本地部署
@@ -48,7 +53,7 @@ npm run start
 - `http://localhost:3000/env-checksum`
 - `http://localhost:3000/checksum`
 - `http://localhost:3000/`
-- `http://localhost:3000/v1/logs`
+- `http://localhost:3000/logs`
 
 ### huggingface部署
 
@@ -83,7 +88,7 @@ npm run start
    ```
    https://test-cursor.hf.space/v1/models
    ```
-5. 为了检测x-cursor-checksum是否设置成功，在接口中添加了日志记录，通过`/v1/logs`接口可以获取日志记录
+5. 为了检测x-cursor-checksum是否设置成功，在接口中添加了日志记录，通过`/logs`接口可以获取日志记录
 
 ## 注意事项
 1. 请妥善保管您的 WorkosCursorSessionToken，不要泄露给他人

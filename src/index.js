@@ -326,7 +326,7 @@ app.post('/v1/chat/completions', async (req, res) => {
 });
 
 // 添加日志获取接口
-app.get('/v1/logs', (req, res) => {
+app.get('/logs', (req, res) => {
   const limit = parseInt(req.query.limit) || 100;
   res.json({
     total: requestLogs.length,
