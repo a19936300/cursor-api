@@ -205,7 +205,7 @@ app.post('/v1/chat/completions', async (req, res) => {
 
     // 生成checksum
     const checksum = req.headers['x-cursor-checksum'] 
-                  ?? process.env['x-cursor-checksum'] 
+                  ?? process.env['X_CURSOR_CHECKSUM'] // 环境变量使用大写
                   ?? generateCursorChecksum(generateHashed64Hex(), generateHashed64Hex());
 
     const response = await fetch('https://api2.cursor.sh/aiserver.v1.AiService/StreamChat', {
