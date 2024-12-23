@@ -218,7 +218,7 @@ app.post('/v1/chat/completions', async (req, res) => {
     requestLogs.push({
         timestamp: requestTime,
         model: req.body.model,
-        checksum: usedChecksum,
+        checksum: usedChecksum.slice(0,5) + '...' + usedChecksum.slice(-5),
         authToken: authToken.slice(0,5) + '...' + authToken.slice(-5),
         stream: req.body.stream || false,
     });
